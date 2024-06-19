@@ -1,11 +1,15 @@
 package productmanagement.model.entites;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class UsedProduct extends Product {
-	
+
 	private Date manufactureDate;
+
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+	private static final DecimalFormat df = new DecimalFormat("0.00");
 
 	public UsedProduct() {
 		super();
@@ -20,15 +24,10 @@ public class UsedProduct extends Product {
 		return manufactureDate;
 	}
 
-	public void setManufactureDate(Date manufactureDate) {
-		this.manufactureDate = manufactureDate;
-	}
-	
 	@Override
 	public String priceTag() {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-		String name = super.getName() + " (used)";
-	    String formattedDate = sdf.format(manufactureDate);
-		return name + " $ " + super.getPrice() + " (Manufacture date : " + formattedDate + ")"; 
+		String formattedDate = sdf.format(manufactureDate);
+		String formattedPrice = df.format(super.getPrice());
+		return String.format("%s (used) $ %s (Manufacture date: %s)", super.getName(), formattedPrice, formattedDate);
 	}
 }

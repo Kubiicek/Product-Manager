@@ -16,14 +16,10 @@ public class ImportedProduct extends Product{
 	public Double getCustomsFee() {
 		return customsFee;
 	}
-
-	public void setCustomsFee(Double customsFee) {
-		this.customsFee = customsFee;
-	}
 	
 	@Override
 	public String priceTag() {
-		Double getPric = super.getPrice() + customsFee;
-		return super.getName() + " $ " + getPric + " (Customs fee: $ " + customsFee + ")";
+		Double totalPrice = super.getPrice() + customsFee;
+		return String.format("%s $ %.2f (Customs fee: $ %.2f)", super.getName(), totalPrice, customsFee);
 	}
 }

@@ -16,66 +16,66 @@ import productmanagement.model.exceptions.InvalidInput;
 import productmanagement.model.exceptions.InvalidNumber;
 
 public class Program {
-	public static void main(String[] args) throws ParseException, InvalidInput {
-		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
+	private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+
+	public static void main(String[] args) {
+		
 		Locale.setDefault(Locale.US);
-		Scanner sc = new Scanner(System.in);
 
-		System.out.print("Enter the number of products: ");
-		int n_products = sc.nextInt();
-		sc.nextLine();
+		try (Scanner sc = new Scanner(System.in)) {
+			System.out.print("Enter the number of products: ");
+			int nProducts = sc.nextInt();
+			sc.nextLine();
 
-		List<Product> products = new ArrayList<>();
+			List<Product> products = new ArrayList<>();
 
-		for (int i = 1; i <= n_products; i++) {
-			try {
-				System.out.println("Product #" + i + " data:");
-				System.out.print("Common, used or imported (c/u/i)? ");
-				char cui = Character.toUpperCase(sc.next().charAt(0));
-				sc.nextLine();
-
-				System.out.print("Name: ");
-				String name = sc.nextLine();
-
-				System.out.print("Price: ");
-				Double price = sc.nextDouble();
-				sc.nextLine();
-
-				switch (cui) {
-				case 'I' -> {
-					System.out.print("Customs fee: ");
-					Double customsFee = checkNumber(sc);
-					ImportedProduct ip = new ImportedProduct(name, price, customsFee);
-					products.add(ip);
+			for (int i = 1; i <= nProducts; i++) {
+				try {
+					products.add(readProductData(sc, i));
+				} catch (InvalidInput | InvalidNumber | ParseException e) {
+					System.err.println(e.getMessage());
+					i--; 
 				}
-				case 'U' -> {
-					System.out.print("Manufacture date (DD/MM/YYYY): ");
-					String dateStr = sc.nextLine();
-					Date date = sdf.parse(dateStr);
-					UsedProduct up = new UsedProduct(name, price, date);
-					products.add(up);
-				}
-				case 'C' -> {
-					Product p = new Product(name, price);
-					products.add(p);
-				}
-				default -> throw new InvalidInput("Invalid Option");
-				}
-			} catch (InvalidInput | InvalidNumber | ParseException e) {
-				System.err.println(e.getMessage());
-				i--;
 			}
-		}
 
-		System.out.println("PRICE TAGS:");
-		for (Product product : products) {
-			System.out.println(product.priceTag());
+			System.out.println("PRICE TAGS:");
+			products.forEach(p -> System.out.println(p.priceTag()));
 		}
-
-		sc.close();
 	}
 
-	public static Double checkNumber(Scanner scanner) throws InvalidNumber {
+	private static Product readProductData(Scanner sc, int index) throws InvalidInput, InvalidNumber, ParseException {
+		System.out.println("Product #" + index + " data:");
+		System.out.print("Common, used or imported (c/u/i)? ");
+		char cui = Character.toUpperCase(sc.next().charAt(0));
+		sc.nextLine();
+
+		System.out.print("Name: ");
+		String name = sc.nextLine();
+
+		System.out.print("Price: ");
+		double price = checkNumber(sc);
+		sc.nextLine();
+
+		return switch (cui) {
+		case 'I' -> {
+			System.out.print("Customs fee: ");
+			double customsFee = checkNumber(sc);
+			yield new ImportedProduct(name, price, customsFee);
+		}
+		case 'U' -> {
+			System.out.print("Manufacture date (DD/MM/YYYY): ");
+			String dateStr = sc.nextLine();
+			Date date = sdf.parse(dateStr);
+			yield new UsedProduct(name, price, date);
+		}
+		case 'C' -> new Product(name, price);
+
+		default -> throw new InvalidInput("Invalid Option");
+		};
+	}
+
+	public static double checkNumber(Scanner scanner) throws InvalidNumber {
 		try {
 			return scanner.nextDouble();
 		} catch (InputMismatchException e) {

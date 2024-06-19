@@ -25,11 +25,8 @@ public class Product {
 		return price;
 	}
 
-	public void setPrice(Double price) {
-		this.price = price;
-	}
 
 	public String priceTag() {
-		return name + " $ " + price;
+		return name + " $ " + String.format("%.2f", price);
 	}
 }
